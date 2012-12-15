@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string>
 #include <poll.h>
+#include <fstream>
 
 #include "socket.hh"
 #include "controller.hh"
@@ -13,9 +14,9 @@ int main( int argc, char *argv[] )
 {
   /* check arguments */
   bool debug = false;
-  if ( argc == 4 && string( argv[ 3 ] ) == "debug" ) {
+  if ( argc == 5 && string( argv[ 4 ] ) == "debug" ) {
     debug = true;
-  } else if ( argc == 3 ) {
+  } else if ( argc == 4 ) {
     /* do nothing */
   } else {
     fprintf( stderr, "Usage: %s IP PORT [debug]\n", argv[ 0 ] );
@@ -32,6 +33,20 @@ int main( int argc, char *argv[] )
     /* Create UDP socket for outgoing datagrams. */
     Network::Socket sock;
 
+    string filename = string( argv[ 3 ] );
+    ifstream file(filename);
+    string file_payload;
+    string s;
+
+    while(getline(file, s)){//gets all lines
+        file_payload += s;//copy line to file_payload
+        file_payload.push_back('\n');
+    }
+    file.close();
+
+    string sample_string = string(1472 - sizeof(Integer64)*5, 'a');
+    
+
     /* Initialize packet counters */
     uint64_t sequence_number = 0;
     uint64_t next_ack_expected = 0;
@@ -39,7 +54,6 @@ int main( int argc, char *argv[] )
     /* Initialize flow controller */
     Controller controller( debug );
 
-    string sample_string = string(1472 - sizeof(Integer64)*5, 'a');
 
 
     /* Loop */
@@ -49,7 +63,7 @@ int main( int argc, char *argv[] )
 
       /* fill up window */
       while ( sequence_number - next_ack_expected < window_size ) {
-	Packet x( destination, sequence_number++, sample_string );
+	Packet x( destination, sequence_number++, file_payload);
 	sock.send( x );
 	controller.packet_was_sent( x.sequence_number(),
 				    x.send_timestamp() );
@@ -63,7 +77,7 @@ int main( int argc, char *argv[] )
 	throw string( "poll returned error." );
       } else if ( packet_received == 0 ) { /* timeout */
 	/* send a packet */
-	Packet x( destination, sequence_number++, sample_string );
+	Packet x( destination, sequence_number++, file_payload);
 	sock.send( x );
 	controller.packet_was_sent( x.sequence_number(),
 				    x.send_timestamp() );
