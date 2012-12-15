@@ -29,6 +29,7 @@ int main( int argc, char *argv[] )
 
       Packet received_packet = sock.recv();
       fprintf( stderr, "Got a packet!\n" );
+      fprintf( stderr, received_packet.payload().c_str() );
 
       /* Send back acknowledgment */
       Packet ack( received_packet.addr(), sequence_number++, received_packet );

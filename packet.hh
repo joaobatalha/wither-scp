@@ -33,9 +33,11 @@ namespace Network {
        In Datagrump the payload is just filled with garbage data. */
     unsigned int payload_len_;
 
-  public:
+    std::string payload_;
+
+public:
     /* Make outgoing data packet */
-    Packet( const Address & addr, const uint64_t sequence_number );
+    Packet( const Address & addr, const uint64_t sequence_number, const std::string & payload );
 
     /* Make ACK */
     Packet( const Address & addr, const uint64_t sequence_number,
@@ -65,6 +67,8 @@ namespace Network {
     { return ack_recv_timestamp_.int64(); }
 
     unsigned int payload_len( void ) const { return payload_len_; }
+    std::string payload( void ) const
+    { return payload_; }
 
     /* An ACK has an ack_sequence_number less than 2^64 - 1. */
     bool is_ack( void ) const;

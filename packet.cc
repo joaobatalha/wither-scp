@@ -8,7 +8,7 @@ using namespace std;
 using namespace Network;
 
 /* Make outgoing data packet */
-Packet::Packet( const Address & addr, const uint64_t sequence_number )
+Packet::Packet( const Address & addr, const uint64_t sequence_number, const string & s_payload )
   : addr_( addr ),
     sequence_number_( sequence_number ),
     send_timestamp_(),
@@ -16,7 +16,8 @@ Packet::Packet( const Address & addr, const uint64_t sequence_number )
     ack_send_timestamp_(),
     ack_recv_timestamp_(),
     recv_timestamp_(),
-    payload_len_( DATA_PACKET_SIZE - HEADER_SIZE )
+    payload_len_( DATA_PACKET_SIZE - HEADER_SIZE ),
+    payload_( s_payload )
 {
   assert( !is_ack() );
 }
@@ -31,7 +32,8 @@ Packet::Packet( const Address & addr, const uint64_t sequence_number,
     ack_send_timestamp_( other.send_timestamp() ),
     ack_recv_timestamp_( other.recv_timestamp() ),
     recv_timestamp_(),
-    payload_len_( 0 )
+    payload_len_( 0 ),
+    payload_()
 {
   assert( is_ack() );
 }
@@ -44,7 +46,8 @@ Packet::Packet( const Address & addr, const string & str,
     ack_sequence_number_(), ack_send_timestamp_(),
     ack_recv_timestamp_(),
     recv_timestamp_( timestamp( receive_ts ) ),
-    payload_len_()
+    payload_len_(),
+    payload_()
 {
   if ( str.size() < HEADER_SIZE ) {
     throw string( "Incoming datagram not long enough to decode." );
@@ -56,6 +59,7 @@ Packet::Packet( const Address & addr, const string & str,
   ack_send_timestamp_ = str.substr( 3*sizeof(uint64_t), sizeof(uint64_t) );
   ack_recv_timestamp_ = str.substr( 4*sizeof(uint64_t), sizeof(uint64_t) );
   payload_len_ = str.size() - HEADER_SIZE;
+  payload_ = str.substr(5*sizeof(uint64_t), payload_len_); 
 }
 
 /* Prepare to send */
@@ -73,7 +77,8 @@ string Packet::str( void ) const
     + ack_sequence_number_.str()
     + ack_send_timestamp_.str()
     + ack_recv_timestamp_.str()
-    + string( payload_len_, 'x' );
+    + payload_;
+    //+ string( payload_len_, 'x' );
 
   assert( ret.size() <= DATA_PACKET_SIZE );
 

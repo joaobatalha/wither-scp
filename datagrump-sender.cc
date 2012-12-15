@@ -39,6 +39,9 @@ int main( int argc, char *argv[] )
     /* Initialize flow controller */
     Controller controller( debug );
 
+    string sample_string = string(1472 - sizeof(Integer64)*5, 'a');
+
+
     /* Loop */
     while ( 1 ) {
       /* Ask controller: what is the window size? */
@@ -46,7 +49,7 @@ int main( int argc, char *argv[] )
 
       /* fill up window */
       while ( sequence_number - next_ack_expected < window_size ) {
-	Packet x( destination, sequence_number++ );
+	Packet x( destination, sequence_number++, sample_string );
 	sock.send( x );
 	controller.packet_was_sent( x.sequence_number(),
 				    x.send_timestamp() );
@@ -60,7 +63,7 @@ int main( int argc, char *argv[] )
 	throw string( "poll returned error." );
       } else if ( packet_received == 0 ) { /* timeout */
 	/* send a packet */
-	Packet x( destination, sequence_number++ );
+	Packet x( destination, sequence_number++, sample_string );
 	sock.send( x );
 	controller.packet_was_sent( x.sequence_number(),
 				    x.send_timestamp() );
