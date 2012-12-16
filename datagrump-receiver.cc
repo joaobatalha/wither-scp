@@ -50,12 +50,13 @@ int main( int argc, char *argv[] )
         fprintf( stderr, received_packet.payload().c_str() );
         
         if (received_packet.sequence_number() == 0) {
-          fileread = new char[atoi(received_packet.payload().c_str())]; //file is in pkts
+          fileread = new char[atoi(received_packet.payload().c_str())]; //file size in bytes 
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
 
-          //fileread[received_packet.sequence_number()]=strdup(received_packet.payload().c_str());
+          //*(filereader + received_packet.sequence_number()*NUM_BYTES] = received_packet.payload();
+
           /* Send back acknowledgment */
           Packet ack( received_packet.addr(), sequence_number++, received_packet );
           sock.send( ack );
