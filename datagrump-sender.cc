@@ -3,6 +3,8 @@
 #include <string>
 #include <poll.h>
 #include <fstream>
+#include <bitset>
+#include <math.h>
 
 #include "socket.hh"
 #include "controller.hh"
@@ -47,6 +49,13 @@ int main( int argc, char *argv[] )
     } else {
       throw string("unable to open file");
     }
+    const float c_size = size;
+    const int c_payload_size = PAYLOAD_SIZE;
+    const int temp_size = (int) ceil(( c_size )/c_payload_size); 
+    const int size_in_blocks =  (const int) temp_size;
+    const int ss = (const int) 1.35*10;
+    //const int size_in_blocks = 10;
+    bitset<size_in_blocks> acked_bitmap;
 
     /* Initialize packet counters */
     uint64_t sequence_number = 0;

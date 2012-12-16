@@ -6,9 +6,9 @@
 #include "address.hh"
 #include "int64.hh"
 
-#define HEADER_SIZE sizeof( Integer64 ) * 6
+#define HEADER_SIZE (sizeof( Integer64 ) * 6)
 #define DATA_PACKET_SIZE 1472
-#define PAYLOAD_SIZE DATA_PACKET_SIZE - HEADER_SIZE
+#define PAYLOAD_SIZE ((DATA_PACKET_SIZE) - (HEADER_SIZE))
 
 /* Packet class */
 namespace Network {
