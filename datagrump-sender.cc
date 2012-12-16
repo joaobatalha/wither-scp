@@ -51,6 +51,7 @@ int main( int argc, char *argv[] )
     /* Initialize packet counters */
     uint64_t sequence_number = 0;
     uint64_t next_ack_expected = 0;
+    uint64_t block_number = 0;
 
     /* Initialize flow controller */
     Controller controller( debug );
@@ -62,7 +63,7 @@ int main( int argc, char *argv[] )
 
       /* fill up window */
       while ( sequence_number - next_ack_expected < window_size ) {
-        Packet x( destination, sequence_number++, file_payload);
+        Packet x( destination, sequence_number++, block_number, file_payload);
         sock.send( x );
         controller.packet_was_sent( x.sequence_number(),
           x.send_timestamp() );
@@ -80,7 +81,7 @@ int main( int argc, char *argv[] )
       } else if ( packet_received == 0 ) { /* timeout */
 
         /* send a packet */
-        Packet x( destination, sequence_number++, file_payload);
+        Packet x( destination, sequence_number++, block_number,  file_payload);
         sock.send( x );
 
         controller.packet_was_sent( x.sequence_number(),

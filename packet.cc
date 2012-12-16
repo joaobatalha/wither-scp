@@ -8,13 +8,14 @@ using namespace std;
 using namespace Network;
 
 /* Make outgoing data packet */
-Packet::Packet( const Address & addr, const uint64_t sequence_number, const string & s_payload )
+Packet::Packet( const Address & addr, const uint64_t sequence_number, const uint64_t block_number, const string & s_payload )
   : addr_( addr ),
     sequence_number_( sequence_number ),
     send_timestamp_(),
     ack_sequence_number_( -1 ),
     ack_send_timestamp_(),
     ack_recv_timestamp_(),
+    block_number_(block_number),
     recv_timestamp_(),
     payload_len_(s_payload.size()),
     payload_( s_payload )
@@ -31,6 +32,7 @@ Packet::Packet( const Address & addr, const uint64_t sequence_number,
     ack_sequence_number_( other.sequence_number() ),
     ack_send_timestamp_( other.send_timestamp() ),
     ack_recv_timestamp_( other.recv_timestamp() ),
+    block_number_( other.block_number() ), 
     recv_timestamp_(),
     payload_len_(),
     payload_()
@@ -45,6 +47,7 @@ Packet::Packet( const Address & addr, const string & str,
     sequence_number_(), send_timestamp_(),
     ack_sequence_number_(), ack_send_timestamp_(),
     ack_recv_timestamp_(),
+    block_number_(),
     recv_timestamp_( timestamp( receive_ts ) ),
     payload_len_(),
     payload_()
@@ -58,8 +61,9 @@ Packet::Packet( const Address & addr, const string & str,
   ack_sequence_number_ = str.substr( 2*sizeof(uint64_t), sizeof(uint64_t) );
   ack_send_timestamp_ = str.substr( 3*sizeof(uint64_t), sizeof(uint64_t) );
   ack_recv_timestamp_ = str.substr( 4*sizeof(uint64_t), sizeof(uint64_t) );
+  block_number_ = str.substr( 5*sizeof(uint64_t), sizeof(uint64_t) );
   payload_len_ = str.size() - HEADER_SIZE;
-  payload_ = str.substr(5*sizeof(uint64_t), payload_len_); 
+  payload_ = str.substr(6*sizeof(uint64_t), payload_len_); 
 }
 
 /* Prepare to send */
@@ -77,6 +81,7 @@ string Packet::str( void ) const
     + ack_sequence_number_.str()
     + ack_send_timestamp_.str()
     + ack_recv_timestamp_.str()
+    + block_number_.str()
     + payload_;
 
   assert( ret.size() <= DATA_PACKET_SIZE );

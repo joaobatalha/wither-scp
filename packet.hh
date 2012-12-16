@@ -22,7 +22,9 @@ namespace Network {
     Integer64 ack_send_timestamp_;
     Integer64 ack_recv_timestamp_;
 
-    static const unsigned int HEADER_SIZE = sizeof( Integer64 ) * 5;
+    Integer64 block_number_;
+
+    static const unsigned int HEADER_SIZE = sizeof( Integer64 ) * 6;
     static const unsigned int DATA_PACKET_SIZE = 1472;
 
     /* This field is filled in on receipt, and is not
@@ -37,7 +39,7 @@ namespace Network {
 
 public:
     /* Make outgoing data packet */
-    Packet( const Address & addr, const uint64_t sequence_number, const std::string & payload );
+    Packet( const Address & addr, const uint64_t sequence_number, uint64_t block_number, const std::string & payload );
 
     /* Make ACK */
     Packet( const Address & addr, const uint64_t sequence_number,
@@ -65,6 +67,8 @@ public:
     { return ack_send_timestamp_.int64(); }
     uint64_t ack_recv_timestamp( void ) const
     { return ack_recv_timestamp_.int64(); }
+    uint64_t block_number( void ) const
+    { return block_number_.int64(); }
 
     unsigned int payload_len( void ) const { return payload_len_; }
     std::string payload( void ) const
