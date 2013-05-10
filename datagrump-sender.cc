@@ -39,7 +39,7 @@ int main( int argc, char *argv[] )
     /* Initialize flow controller */
     Controller controller( debug );
 
-    string sample_string = string(1472 - sizeof(Integer64)*5, 'a');
+    string sample_string = "12";
 
 
     /* Loop */

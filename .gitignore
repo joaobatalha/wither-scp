@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+datagrump-receiver
+datagrump-sender
+.*
+depend

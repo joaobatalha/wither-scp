@@ -16,7 +16,7 @@ Packet::Packet( const Address & addr, const uint64_t sequence_number, const stri
     ack_send_timestamp_(),
     ack_recv_timestamp_(),
     recv_timestamp_(),
-    payload_len_( DATA_PACKET_SIZE - HEADER_SIZE ),
+    payload_len_(s_payload.size()),
     payload_( s_payload )
 {
   assert( !is_ack() );
@@ -32,7 +32,7 @@ Packet::Packet( const Address & addr, const uint64_t sequence_number,
     ack_send_timestamp_( other.send_timestamp() ),
     ack_recv_timestamp_( other.recv_timestamp() ),
     recv_timestamp_(),
-    payload_len_( 0 ),
+    payload_len_(),
     payload_()
 {
   assert( is_ack() );
@@ -78,7 +78,6 @@ string Packet::str( void ) const
     + ack_send_timestamp_.str()
     + ack_recv_timestamp_.str()
     + payload_;
-    //+ string( payload_len_, 'x' );
 
   assert( ret.size() <= DATA_PACKET_SIZE );
 

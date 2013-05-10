@@ -25,15 +25,23 @@ int main( int argc, char *argv[] )
 
     /* Loop */
     uint64_t sequence_number = 0;
+
     while ( 1 ) {
 
       Packet received_packet = sock.recv();
       fprintf( stderr, "Got a packet!\n" );
       fprintf( stderr, received_packet.payload().c_str() );
+      
+      if (received_packet.sequence_number() == 0) {
+        int numpkts = atoi(received_packet.payload().c_str());
+        Packet ack( received_packet.addr(), 1, received_packet );
+        sock.send( ack );
+      } else {
+        /* Send back acknowledgment */
+        Packet ack( received_packet.addr(), sequence_number++, received_packet );
+        sock.send( ack );
+      }
 
-      /* Send back acknowledgment */
-      Packet ack( received_packet.addr(), sequence_number++, received_packet );
-      sock.send( ack );
     }
   } catch ( const string & exception ) {
     /* We got an exception, so quit. */
