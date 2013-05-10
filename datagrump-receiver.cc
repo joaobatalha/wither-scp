@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <poll.h>
 
 #include "socket.hh"
+
+#define TIMEOUT 100
 
 using namespace Network;
 using namespace std;
@@ -28,18 +31,33 @@ int main( int argc, char *argv[] )
 
     while ( 1 ) {
 
-      Packet received_packet = sock.recv();
-      fprintf( stderr, "Got a packet!\n" );
-      fprintf( stderr, received_packet.payload().c_str() );
-      
-      if (received_packet.sequence_number() == 0) {
-        int numpkts = atoi(received_packet.payload().c_str());
-        Packet ack( received_packet.addr(), 1, received_packet );
-        sock.send( ack );
+      /* Wait for acknowledgement or timeout */
+      struct pollfd fd = { sock.fd(), POLLIN, 0 };
+      int packet_received = poll( &fd, 1, TIMEOUT);
+
+      if ( packet_received < 0 ) { /* error */
+
+        perror( "poll" );
+        throw string( "poll returned error." );
+
+      } else if ( packet_received == 0 ) { /* timeout */
+        /* send a bitmap */
+
       } else {
-        /* Send back acknowledgment */
-        Packet ack( received_packet.addr(), sequence_number++, received_packet );
-        sock.send( ack );
+
+        Packet received_packet = sock.recv();
+        fprintf( stderr, "Got a packet!\n" );
+        fprintf( stderr, received_packet.payload().c_str() );
+        
+        if (received_packet.sequence_number() == 0) {
+          int numpkts = atoi(received_packet.payload().c_str());
+          Packet ack( received_packet.addr(), 1, received_packet );
+          sock.send( ack );
+        } else {
+          /* Send back acknowledgment */
+          Packet ack( received_packet.addr(), sequence_number++, received_packet );
+          sock.send( ack );
+        }
       }
 
     }

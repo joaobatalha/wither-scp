@@ -19,7 +19,7 @@ int main( int argc, char *argv[] )
   } else if ( argc == 4 ) {
     /* do nothing */
   } else {
-    fprintf( stderr, "Usage: %s IP PORT [debug]\n", argv[ 0 ] );
+    fprintf( stderr, "Usage: %s IP PORT FILE [debug]\n", argv[ 0 ] );
     exit( 1 );
   }
 
@@ -38,14 +38,12 @@ int main( int argc, char *argv[] )
     string file_payload;
     string s;
 
-    while(getline(file, s)){//gets all lines
-        file_payload += s;//copy line to file_payload
+    while (getline(file, s)) { //gets all lines
+        file_payload += s; //copy line to file_payload
         file_payload.push_back('\n');
     }
-    file.close();
 
-    string sample_string = string(1472 - sizeof(Integer64)*5, 'a');
-    
+    file.close();
 
     /* Initialize packet counters */
     uint64_t sequence_number = 0;
