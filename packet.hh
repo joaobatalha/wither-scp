@@ -6,6 +6,10 @@
 #include "address.hh"
 #include "int64.hh"
 
+#define HEADER_SIZE sizeof( Integer64 ) * 5
+#define DATA_PACKET_SIZE 1472
+#define PAYLOAD_SIZE DATA_PACKET_SIZE - HEADER_SIZE
+
 /* Packet class */
 namespace Network {
   class Packet {
@@ -22,8 +26,8 @@ namespace Network {
     Integer64 ack_send_timestamp_;
     Integer64 ack_recv_timestamp_;
 
-    static const unsigned int HEADER_SIZE = sizeof( Integer64 ) * 5;
-    static const unsigned int DATA_PACKET_SIZE = 1472;
+    //static const unsigned int HEADER_SIZE = sizeof( Integer64 ) * 5;
+    //static const unsigned int DATA_PACKET_SIZE = 1472;
 
     /* This field is filled in on receipt, and is not
        transmitted over the wire */
