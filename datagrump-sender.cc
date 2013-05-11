@@ -8,6 +8,7 @@
 
 #include "socket.hh"
 #include "controller.hh"
+#include "bitmap.hh"
 
 using namespace std;
 using namespace Network;
@@ -37,30 +38,20 @@ int main( int argc, char *argv[] )
 
     string filename = string( argv[ 3 ] );
     ifstream file(filename, ios::in | ios::ate | ios::binary);
-    char * file_payload;
+    char * file_payload = new char[PAYLOAD_SIZE];
     ifstream::pos_type size;
     
     if (file.is_open()){
       size = file.tellg();
-      file_payload = new char [size];
-      file.seekg (0, ios::beg);
-      file.read (file_payload, size);
-      file.close();
     } else {
       throw string("unable to open file");
     }
-    const float c_size = size;
-    const int c_payload_size = PAYLOAD_SIZE;
-    const int temp_size = (int) ceil(( c_size )/c_payload_size); 
-    const int size_in_blocks =  (const int) temp_size;
-    const int ss = (const int) 1.35*10;
-    //const int size_in_blocks = 10;
-    bitset<size_in_blocks> acked_bitmap;
+
+    Bitmap bitmap(ceil((1.0*size)/PAYLOAD_SIZE));
 
     /* Initialize packet counters */
     uint64_t sequence_number = 0;
     uint64_t next_ack_expected = 0;
-    uint64_t block_number = 0;
 
     /* Initialize flow controller */
     Controller controller( debug );
@@ -72,10 +63,20 @@ int main( int argc, char *argv[] )
 
       /* fill up window */
       while ( sequence_number - next_ack_expected < window_size ) {
-        Packet x( destination, sequence_number++, block_number, file_payload);
+        int next_block = bitmap.next_block();
+        if (next_block == -1){
+
+        } else {
+          if (file.is_open()){
+            file.seekg (next_block*PAYLOAD_SIZE, ios::beg);
+            file.read (file_payload, PAYLOAD_SIZE);
+          } else {
+            throw string("unable to open file");
+          }
+        }
+
+        Packet x( destination, sequence_number++, next_block, file_payload);
         sock.send( x );
-        controller.packet_was_sent( x.sequence_number(),
-          x.send_timestamp() );
       }
 
       /* Wait for acknowledgement or timeout */
@@ -89,8 +90,16 @@ int main( int argc, char *argv[] )
         throw string( "poll returned error." );
       } else if ( packet_received == 0 ) { /* timeout */
 
+        int next_block = bitmap.next_block();
+        if (file.is_open()){
+          file.seekg (next_block*PAYLOAD_SIZE, ios::beg);
+          file.read (file_payload, PAYLOAD_SIZE);
+        } else {
+          throw string("unable to open file");
+        }
+       
         /* send a packet */
-        Packet x( destination, sequence_number++, block_number,  file_payload);
+        Packet x( destination, sequence_number++, next_block, file_payload);
         sock.send( x );
 
         controller.packet_was_sent( x.sequence_number(),
@@ -98,6 +107,7 @@ int main( int argc, char *argv[] )
       } else {
         /* we got an acknowledgment */
         Packet ack = sock.recv();
+        bitmap.set_bit(ack.block_number());
 
         /* update our counter */
         next_ack_expected = max( next_ack_expected,

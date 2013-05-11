@@ -3,7 +3,8 @@
 using namespace std;
 Bitmap::Bitmap(int n_blocks)
     : num_blocks_(n_blocks),
-    bitmap_()
+    bitmap_(),
+    just_sent_()
 { }
 
 bool Bitmap::is_set( int block_number ){
@@ -28,10 +29,13 @@ bool Bitmap::is_full( void ){
     return true;
 }
 
-int Bitmap::next_block( void ){
-    for( int i=0; i < num_blocks_; i++){
-        if (is_set(i) == false){
-            return i;
+int Bitmap::next_block( void ) {
+    if (is_full()){
+      return -1;
+    }
+    for( int i=just_sent_+1; ; i++){
+        if (is_set(i%num_blocks_) == false){
+            return i%num_blocks_;
         }
     }
     return -1;

@@ -8,7 +8,8 @@
 
 #define HEADER_SIZE (sizeof( Integer64 ) * 6)
 #define DATA_PACKET_SIZE 1472
-#define PAYLOAD_SIZE ((DATA_PACKET_SIZE) - (HEADER_SIZE))
+//#define PAYLOAD_SIZE ((DATA_PACKET_SIZE) - (HEADER_SIZE))
+#define PAYLOAD_SIZE 10
 
 /* Packet class */
 namespace Network {
@@ -28,8 +29,6 @@ namespace Network {
 
     Integer64 block_number_;
 
-    //static const unsigned int HEADER_SIZE = sizeof( Integer64 ) * 5;
-    //static const unsigned int DATA_PACKET_SIZE = 1472;
 
     /* This field is filled in on receipt, and is not
        transmitted over the wire */

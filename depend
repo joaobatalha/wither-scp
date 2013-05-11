@@ -1,0 +1,12 @@
+socket.o: socket.cc socket.hh address.hh packet.hh int64.hh
+address.o: address.cc address.hh util.hh
+packet.o: packet.cc address.hh packet.hh int64.hh timestamp.hh
+int64.o: int64.cc int64.hh
+timestamp.o: timestamp.cc timestamp.hh
+datagrump-sender.o: datagrump-sender.cc socket.hh address.hh packet.hh \
+ int64.hh controller.hh bitmap.hh
+datagrump-receiver.o: datagrump-receiver.cc socket.hh address.hh \
+ packet.hh int64.hh
+util.o: util.cc util.hh
+controller.o: controller.cc controller.hh timestamp.hh
+bitmap.o: bitmap.cc bitmap.hh

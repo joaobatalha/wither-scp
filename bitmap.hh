@@ -3,8 +3,9 @@
 
 class Bitmap {
     private:
-        char bitmap_[300000];
         int num_blocks_; 
+        int just_sent_; 
+        char bitmap_[300000];
 
         bool is_set( int block_number );
     public:
