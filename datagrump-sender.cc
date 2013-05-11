@@ -34,16 +34,19 @@ int main( int argc, char *argv[] )
     Network::Socket sock;
 
     string filename = string( argv[ 3 ] );
-    ifstream file(filename);
-    string file_payload;
-    string s;
-
-    while (getline(file, s)) { //gets all lines
-        file_payload += s; //copy line to file_payload
-        file_payload.push_back('\n');
+    ifstream file(filename, ios::in | ios::ate | ios::binary);
+    char * file_payload;
+    ifstream::pos_type size;
+    
+    if (file.is_open()){
+      size = file.tellg();
+      file_payload = new char [size];
+      file.seekg (0, ios::beg);
+      file.read (file_payload, size);
+      file.close();
+    } else {
+      throw string("unable to open file");
     }
-
-    file.close();
 
     /* Initialize packet counters */
     uint64_t sequence_number = 0;

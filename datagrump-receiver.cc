@@ -19,6 +19,7 @@ int main( int argc, char *argv[] )
   try {
     /* Create UDP socket for incoming datagrams. */
     Network::Socket sock;
+    char * fileread;
 
     /* Listen on UDP port. */
     sock.bind( Address( "0" /* all IP addresses */,
@@ -46,14 +47,15 @@ int main( int argc, char *argv[] )
       } else {
 
         Packet received_packet = sock.recv();
-        fprintf( stderr, "Got a packet!\n" );
         fprintf( stderr, received_packet.payload().c_str() );
         
         if (received_packet.sequence_number() == 0) {
-          int numpkts = atoi(received_packet.payload().c_str());
+          fileread = new char[atoi(received_packet.payload().c_str())]; //file is in pkts
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
+
+          //fileread[received_packet.sequence_number()]=strdup(received_packet.payload().c_str());
           /* Send back acknowledgment */
           Packet ack( received_packet.addr(), sequence_number++, received_packet );
           sock.send( ack );
