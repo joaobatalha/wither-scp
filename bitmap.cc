@@ -6,8 +6,8 @@ Bitmap::Bitmap(int n_blocks)
     bitmap_()
 { }
 
-Bitmap::is_set( int block_number ){
-    if (bitmap[block_number/8] & (1 << (block_number%8)) ) == 0{
+bool Bitmap::is_set( int block_number ){
+    if ((bitmap_[block_number/8] & (1 << (block_number%8)) ) == 0) {
         return false;
     }
     else{
@@ -15,12 +15,12 @@ Bitmap::is_set( int block_number ){
     }
 }
 
-Bitmap::set_bit( int block_number ){
-    bitmap[block_number/8] |= (1 << (block_number%8));
+void Bitmap::set_bit( int block_number ){
+    bitmap_[block_number/8] |= (1 << (block_number%8));
 }
 
-Bitmap::is_full( void ){
-    for(int i = 0; i < n_blocks; i++){
+bool Bitmap::is_full( void ){
+    for(int i = 0; i < num_blocks_; i++){
         if (is_set(i) == false){
             return false;
         }
@@ -28,8 +28,8 @@ Bitmap::is_full( void ){
     return true;
 }
 
-Bitmap::next_block( void ){
-    for( int i=0; i < n_blocks; i++){
+int Bitmap::next_block( void ){
+    for( int i=0; i < num_blocks_; i++){
         if (is_set(i) == false){
             return i;
         }
