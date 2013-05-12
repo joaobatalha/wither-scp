@@ -8,7 +8,7 @@ executables = datagrump-sender datagrump-receiver
 
 CXX = g++
 #removed -Werror after pedantic
-CXXFLAGS = -g -O3 -std=c++0x -ffast-math -pedantic -Wall -Wextra \
+CXXFLAGS = -g -O0 -std=c++0x -ffast-math -pedantic -Wall -Wextra \
 	-Weffc++ -fno-default-inline -pipe
 LIBS = -lm -lrt
 

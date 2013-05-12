@@ -40,6 +40,7 @@ int main( int argc, char *argv[] )
     ifstream file(filename, ios::in | ios::ate | ios::binary);
     char * file_payload = new char[PAYLOAD_SIZE];
     ifstream::pos_type size;
+    bool sentSize = false;
     
     if (file.is_open()){
       size = file.tellg();
@@ -62,7 +63,7 @@ int main( int argc, char *argv[] )
       unsigned int window_size = controller.window_size();
 
       /* fill up window */
-      while ( sequence_number - next_ack_expected < window_size ) {
+      while (sentSize && sequence_number - next_ack_expected < window_size ) {
         int block_num = bitmap.next_block();
 
         if ( block_num == -1 ) { //transfer is complete
@@ -81,6 +82,11 @@ int main( int argc, char *argv[] )
         }
       }
 
+      if ( !sentSize) {
+        file_payload = (char *) to_string(size).c_str();
+        Packet x( destination, 0, 0, file_payload);
+      }
+
       /* Wait for acknowledgement or timeout */
       struct pollfd fd = { sock.fd(), POLLIN, 0 };
       int packet_received = poll( &fd, 1, controller.timeout_ms() );
@@ -93,31 +99,38 @@ int main( int argc, char *argv[] )
       } else if ( packet_received == 0 ) { /* timeout */
 
         int block_num = bitmap.next_block();
-        if ( block_num == -1 ) { //transfer is complete
-          file_payload = NULL;
-          Packet x( destination, sequence_number++, block_num, file_payload, COMPLETE_MESSAGE);
-          sock.send( x );
 
+        if ( !sentSize) {
+          file_payload = (char *) to_string(size).c_str();
+          Packet x( destination, 0, 0, file_payload);
         } else {
-          if ( file.is_open() ) {
-            file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
-            file.read ( file_payload, PAYLOAD_SIZE);
+          if ( block_num == -1 ) { //transfer is complete
+            file_payload = NULL;
+            Packet x( destination, sequence_number++, block_num, file_payload, COMPLETE_MESSAGE);
+            sock.send( x );
           } else {
-            throw string("unable to open file");
+            if ( file.is_open() ) {
+              file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
+              file.read ( file_payload, PAYLOAD_SIZE);
+            } else {
+              throw string("unable to open file");
+            }
+            Packet x( destination, sequence_number++, block_num, file_payload);
+            sock.send( x );
           }
-          Packet x( destination, sequence_number++, block_num, file_payload);
-          sock.send( x );
-        }
-
+        } 
 
       } else {
         /* we got an acknowledgment */
         Packet ack = sock.recv();
-        bitmap.set_bit(ack.block_number());
-
-        /* update our counter */
-        next_ack_expected = max( next_ack_expected,
-          ack.ack_sequence_number() + 1 );
+        if (ack.sequence_number() == 1) {
+          sentSize = true;
+        } else {
+          bitmap.set_bit(ack.block_number());
+          /* update our counter */
+          next_ack_expected = max( next_ack_expected,
+            ack.ack_sequence_number() + 1 );
+        }
 
         /* tell the controller */
         controller.ack_received( ack.ack_sequence_number(),

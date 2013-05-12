@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <poll.h>
+#include <fstream>
 
 #include "socket.hh"
 
@@ -19,7 +20,6 @@ int main( int argc, char *argv[] )
   try {
     /* Create UDP socket for incoming datagrams. */
     Network::Socket sock;
-    char * fileread;
 
     /* Listen on UDP port. */
     sock.bind( Address( "0" /* all IP addresses */,
@@ -30,6 +30,10 @@ int main( int argc, char *argv[] )
     /* Loop */
     uint64_t sequence_number = 0;
 
+    /*file written */
+    string filename = string("output.txt");
+    ofstream file(filename, ios::out | ios::binary);
+    
     while ( 1 ) {
 
       /* Wait for acknowledgement or timeout */
@@ -42,20 +46,28 @@ int main( int argc, char *argv[] )
         throw string( "poll returned error." );
 
       } else if ( packet_received == 0 ) { /* timeout */
-        /* send a bitmap */
+        /* send a IP_MESSAGE*/
+//        Packet ack(received_packet.addr(), 1, received_packet, IP_MESSAGE);
+//        sock.send( ack );
 
       } else {
 
         Packet received_packet = sock.recv();
-        fprintf( stderr, received_packet.payload().c_str() );
+        fprintf( stderr, "%s", received_packet.payload().c_str() );
         
         if (received_packet.sequence_number() == 0) {
-          fileread = new char[atoi(received_packet.payload().c_str())]; //file size in bytes 
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
+          if (received_packet.message_type() == COMPLETE_MESSAGE){
+            Packet ack( received_packet.addr(), 1, received_packet, COMPLETE_MESSAGE );
+            sock.send( ack );
+            file.close();
+            break;
+          }
 
-          //*(filereader + received_packet.sequence_number()*NUM_BYTES] = received_packet.payload();
+          file.seekp(received_packet.block_number() * PAYLOAD_SIZE, ios::beg); 
+          file.write(received_packet.payload().c_str(), received_packet.payload().size());
 
           /* Send back acknowledgment */
           Packet ack( received_packet.addr(), sequence_number++, received_packet );
