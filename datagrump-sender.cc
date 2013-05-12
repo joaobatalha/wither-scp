@@ -5,6 +5,7 @@
 #include <fstream>
 #include <bitset>
 #include <math.h>
+#include <iostream>
 
 #include "socket.hh"
 #include "controller.hh"
@@ -67,8 +68,7 @@ int main( int argc, char *argv[] )
         int block_num = bitmap.next_block();
 
         if ( block_num == -1 ) { //transfer is complete
-          file_payload = NULL;
-          Packet x( destination, sequence_number++, block_num, file_payload, COMPLETE_MESSAGE);
+          Packet x( destination, sequence_number++, block_num, "", COMPLETE_MESSAGE);
           sock.send( x );
         } else {
           if ( file.is_open() ) {
@@ -78,6 +78,7 @@ int main( int argc, char *argv[] )
             throw string("unable to open file");
           }
           Packet x( destination, sequence_number++, block_num, file_payload);
+          printf("sending block %d\n",  block_num);
           sock.send( x );
         }
       }
@@ -107,8 +108,7 @@ int main( int argc, char *argv[] )
           sock.send( x );
         } else {
           if ( block_num == -1 ) { //transfer is complete
-            file_payload = NULL;
-            Packet x( destination, sequence_number++, block_num, file_payload, COMPLETE_MESSAGE);
+            Packet x( destination, sequence_number++, block_num, "", COMPLETE_MESSAGE);
             sock.send( x );
           } else {
             if ( file.is_open() ) {
@@ -118,6 +118,7 @@ int main( int argc, char *argv[] )
               throw string("unable to open file");
             }
             Packet x( destination, sequence_number++, block_num, file_payload);
+            printf("sending block %d\n",  block_num);
             sock.send( x );
           }
         } 
