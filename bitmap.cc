@@ -3,8 +3,8 @@
 using namespace std;
 Bitmap::Bitmap(int n_blocks)
     : num_blocks_(n_blocks),
-    bitmap_(),
-    just_sent_()
+    just_sent_(),
+    bitmap_()
 { }
 
 bool Bitmap::is_set( int block_number ){
@@ -35,6 +35,7 @@ int Bitmap::next_block( void ) {
     }
     for( int i=just_sent_+1; ; i++){
         if (is_set(i%num_blocks_) == false){
+            just_sent_ = i;
             return i%num_blocks_;
         }
     }

@@ -32,7 +32,8 @@ int main( int argc, char *argv[] )
 
     /*file written */
     string filename = string("output.txt");
-    ofstream file(filename, ios::out | ios::app | ios::binary);
+    ofstream file;
+    file.open(filename, ios::out | ios::binary | ios::trunc);
     
     while ( 1 ) {
 
@@ -55,6 +56,12 @@ int main( int argc, char *argv[] )
         Packet received_packet = sock.recv();
         
         if (received_packet.sequence_number() == 0) {
+          //payload is filesize
+          int filesize = atoi(received_packet.payload().c_str());
+          printf("filesize %d\n", filesize);
+          file.seekp(filesize-1); 
+          file.write("\0", 1);
+
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
@@ -66,6 +73,9 @@ int main( int argc, char *argv[] )
             break;
           }
 
+          if(!file.is_open()){
+            printf("not open file");
+          }
           file.seekp(received_packet.block_number() * PAYLOAD_SIZE, ios::beg); 
           file.write(received_packet.payload().c_str(), received_packet.payload().size());
 

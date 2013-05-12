@@ -49,8 +49,6 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       update_time = timestamp_ack_received;
       last_seq_num = sequence_number_acked;
 
-      fprintf(stderr, "The throughput is %f \n", 
-         the_throughput);
   } 
 
   /* Default: take no action */

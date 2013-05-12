@@ -38,7 +38,8 @@ int main( int argc, char *argv[] )
     Network::Socket sock;
 
     string filename = string( argv[ 3 ] );
-    ifstream file(filename, ios::in | ios::ate | ios::binary);
+    ifstream file;
+    file.open(filename, ios::in | ios::ate | ios::binary);
     char * file_payload = new char[PAYLOAD_SIZE];
     ifstream::pos_type size;
     bool sentSize = false;
@@ -52,7 +53,7 @@ int main( int argc, char *argv[] )
     Bitmap bitmap(ceil((1.0*size)/PAYLOAD_SIZE));
 
     /* Initialize packet counters */
-    uint64_t sequence_number = 0;
+    uint64_t sequence_number = 1;
     uint64_t next_ack_expected = 0;
 
     /* Initialize flow controller */
@@ -73,7 +74,9 @@ int main( int argc, char *argv[] )
         } else {
           if ( file.is_open() ) {
             file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
+            printf("pointer is at %d\n", file.tellg());
             file.read ( file_payload, PAYLOAD_SIZE);
+            file.clear();
           } else {
             throw string("unable to open file");
           }
@@ -84,7 +87,8 @@ int main( int argc, char *argv[] )
       }
 
       if ( !sentSize) {
-        Packet x( destination, 0, 0, to_string(size));
+        file_payload = (char *) to_string(size).c_str();
+        Packet x( destination, 0, 0, file_payload);
         sock.send( x );
       }
 
@@ -97,12 +101,14 @@ int main( int argc, char *argv[] )
         perror( "poll" );
 
         throw string( "poll returned error." );
+
       } else if ( packet_received == 0 ) { /* timeout */
 
         int block_num = bitmap.next_block();
 
         if ( !sentSize) {
-          Packet x( destination, 0, 0, to_string(size));
+          file_payload = (char *) to_string(size).c_str();
+          Packet x( destination, 0, 0, file_payload);
           sock.send( x );
         } else {
           if ( block_num == -1 ) { //transfer is complete
@@ -111,7 +117,9 @@ int main( int argc, char *argv[] )
           } else {
             if ( file.is_open() ) {
               file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
+              printf("pointer is at %d", file.tellg());
               file.read ( file_payload, PAYLOAD_SIZE);
+              file.clear();
             } else {
               throw string("unable to open file");
             }
@@ -129,9 +137,9 @@ int main( int argc, char *argv[] )
         } else {
           bitmap.set_bit(ack.block_number());
           /* update our counter */
-          next_ack_expected = max( next_ack_expected,
-            ack.ack_sequence_number() + 1 );
         }
+        next_ack_expected = max( next_ack_expected,
+          ack.ack_sequence_number() + 1 );
 
         /* tell the controller */
         controller.ack_received( ack.ack_sequence_number(),
