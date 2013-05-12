@@ -84,8 +84,7 @@ int main( int argc, char *argv[] )
       }
 
       if ( !sentSize) {
-        file_payload = (char *) to_string(size).c_str();
-        Packet x( destination, 0, 0, file_payload);
+        Packet x( destination, 0, 0, to_string(size));
         sock.send( x );
       }
 
@@ -103,8 +102,7 @@ int main( int argc, char *argv[] )
         int block_num = bitmap.next_block();
 
         if ( !sentSize) {
-          file_payload = (char *) to_string(size).c_str();
-          Packet x( destination, 0, 0, file_payload);
+          Packet x( destination, 0, 0, to_string(size));
           sock.send( x );
         } else {
           if ( block_num == -1 ) { //transfer is complete

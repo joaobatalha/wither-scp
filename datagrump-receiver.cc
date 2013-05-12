@@ -32,7 +32,7 @@ int main( int argc, char *argv[] )
 
     /*file written */
     string filename = string("output.txt");
-    ofstream file(filename, ios::out | ios::binary);
+    ofstream file(filename, ios::out | ios::app | ios::binary);
     
     while ( 1 ) {
 
