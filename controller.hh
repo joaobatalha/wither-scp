@@ -28,10 +28,6 @@ public:
   /* Get current window size, in packets */
   unsigned int window_size( void );
 
-  /* A packet was sent */
-  void packet_was_sent( const uint64_t sequence_number,
-			const uint64_t send_timestamp );
-
   /* An ack was received */
   void ack_received( const uint64_t sequence_number_acked,
 		     const uint64_t send_timestamp_acked,

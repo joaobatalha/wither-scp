@@ -27,21 +27,6 @@ unsigned int Controller::window_size( void )
   return the_throughput * the_estimated_rtt;
 }
 
-
-/* A packet was sent */
-void Controller::packet_was_sent( const uint64_t sequence_number,
-				  /* of the sent packet */
-				  const uint64_t send_timestamp )
-                                  /* in milliseconds */
-{
-  /* Default: take no action */
-  if ( debug_ ) {
-    fprintf( stderr, "At time %lu, sent packet %lu.\n",
-	     send_timestamp, sequence_number );
-  }
-
-}
-
 /* An ack was received */
 void Controller::ack_received( const uint64_t sequence_number_acked,
 			       /* what sequence number was acknowledged */

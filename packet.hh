@@ -6,10 +6,14 @@
 #include "address.hh"
 #include "int64.hh"
 
-#define HEADER_SIZE (sizeof( Integer64 ) * 6)
+#define HEADER_SIZE (sizeof( Integer64 ) * 7)
 #define DATA_PACKET_SIZE 1472
 //#define PAYLOAD_SIZE ((DATA_PACKET_SIZE) - (HEADER_SIZE))
 #define PAYLOAD_SIZE 10
+
+#define PAYLOAD_MESSAGE 0
+#define IP_MESSAGE 1
+#define COMPLETE_MESSAGE 2
 
 /* Packet class */
 namespace Network {
@@ -29,7 +33,6 @@ namespace Network {
 
     Integer64 block_number_;
 
-
     /* This field is filled in on receipt, and is not
        transmitted over the wire */
     Integer64 recv_timestamp_;
@@ -38,15 +41,17 @@ namespace Network {
        In Datagrump the payload is just filled with garbage data. */
     unsigned int payload_len_;
 
+    Integer64 message_type_;
+ 
     std::string payload_;
 
 public:
     /* Make outgoing data packet */
-    Packet( const Address & addr, const uint64_t sequence_number, uint64_t block_number, const std::string & payload );
+    Packet( const Address & addr, const uint64_t sequence_number, uint64_t block_number, const std::string & payload, const uint64_t message_type=PAYLOAD_MESSAGE);
 
     /* Make ACK */
     Packet( const Address & addr, const uint64_t sequence_number,
-	    const Packet & other );
+	    const Packet & other, const uint64_t message_type=PAYLOAD_MESSAGE);
 
     /* Make incoming packet from wire */
     Packet( const Address & addr, const std::string & str,
@@ -76,6 +81,9 @@ public:
     unsigned int payload_len( void ) const { return payload_len_; }
     std::string payload( void ) const
     { return payload_; }
+
+    uint64_t message_type( void ) const
+    { return message_type_.int64(); }
 
     /* An ACK has an ack_sequence_number less than 2^64 - 1. */
     bool is_ack( void ) const;

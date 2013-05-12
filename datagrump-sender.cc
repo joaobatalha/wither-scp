@@ -63,20 +63,22 @@ int main( int argc, char *argv[] )
 
       /* fill up window */
       while ( sequence_number - next_ack_expected < window_size ) {
-        int next_block = bitmap.next_block();
-        if (next_block == -1){
+        int block_num = bitmap.next_block();
 
+        if ( block_num == -1 ) { //transfer is complete
+          file_payload = NULL;
+          Packet x( destination, sequence_number++, block_num, file_payload, COMPLETE_MESSAGE);
+          sock.send( x );
         } else {
-          if (file.is_open()){
-            file.seekg (next_block*PAYLOAD_SIZE, ios::beg);
-            file.read (file_payload, PAYLOAD_SIZE);
+          if ( file.is_open() ) {
+            file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
+            file.read ( file_payload, PAYLOAD_SIZE);
           } else {
             throw string("unable to open file");
           }
+          Packet x( destination, sequence_number++, block_num, file_payload);
+          sock.send( x );
         }
-
-        Packet x( destination, sequence_number++, next_block, file_payload);
-        sock.send( x );
       }
 
       /* Wait for acknowledgement or timeout */
@@ -90,20 +92,24 @@ int main( int argc, char *argv[] )
         throw string( "poll returned error." );
       } else if ( packet_received == 0 ) { /* timeout */
 
-        int next_block = bitmap.next_block();
-        if (file.is_open()){
-          file.seekg (next_block*PAYLOAD_SIZE, ios::beg);
-          file.read (file_payload, PAYLOAD_SIZE);
-        } else {
-          throw string("unable to open file");
-        }
-       
-        /* send a packet */
-        Packet x( destination, sequence_number++, next_block, file_payload);
-        sock.send( x );
+        int block_num = bitmap.next_block();
+        if ( block_num == -1 ) { //transfer is complete
+          file_payload = NULL;
+          Packet x( destination, sequence_number++, block_num, file_payload, COMPLETE_MESSAGE);
+          sock.send( x );
 
-        controller.packet_was_sent( x.sequence_number(),
-          x.send_timestamp() );
+        } else {
+          if ( file.is_open() ) {
+            file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
+            file.read ( file_payload, PAYLOAD_SIZE);
+          } else {
+            throw string("unable to open file");
+          }
+          Packet x( destination, sequence_number++, block_num, file_payload);
+          sock.send( x );
+        }
+
+
       } else {
         /* we got an acknowledgment */
         Packet ack = sock.recv();
@@ -118,6 +124,14 @@ int main( int argc, char *argv[] )
           ack.ack_send_timestamp(),
           ack.ack_recv_timestamp(),
           ack.recv_timestamp() );
+
+        if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
+          break;
+        }
+
+        if ( ack.message_type() == IP_MESSAGE) { /* Update destination IP */
+          destination = ack.addr();
+        }
       }
     }
   } catch ( const string & exception ) {
