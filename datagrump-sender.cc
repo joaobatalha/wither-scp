@@ -85,6 +85,7 @@ int main( int argc, char *argv[] )
       if ( !sentSize) {
         file_payload = (char *) to_string(size).c_str();
         Packet x( destination, 0, 0, file_payload);
+        sock.send( x );
       }
 
       /* Wait for acknowledgement or timeout */
@@ -103,6 +104,7 @@ int main( int argc, char *argv[] )
         if ( !sentSize) {
           file_payload = (char *) to_string(size).c_str();
           Packet x( destination, 0, 0, file_payload);
+          sock.send( x );
         } else {
           if ( block_num == -1 ) { //transfer is complete
             file_payload = NULL;

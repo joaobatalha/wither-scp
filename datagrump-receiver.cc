@@ -28,7 +28,7 @@ int main( int argc, char *argv[] )
     fprintf( stderr, "Listening on port %s...\n", argv[ 1 ] );
 
     /* Loop */
-    uint64_t sequence_number = 0;
+    uint64_t sequence_number = 1;
 
     /*file written */
     string filename = string("output.txt");
@@ -53,12 +53,12 @@ int main( int argc, char *argv[] )
       } else {
 
         Packet received_packet = sock.recv();
-        fprintf( stderr, "%s", received_packet.payload().c_str() );
         
         if (received_packet.sequence_number() == 0) {
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
+          fprintf( stderr, "%s", received_packet.payload().c_str() );
           if (received_packet.message_type() == COMPLETE_MESSAGE){
             Packet ack( received_packet.addr(), 1, received_packet, COMPLETE_MESSAGE );
             sock.send( ack );
