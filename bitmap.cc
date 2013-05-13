@@ -3,7 +3,7 @@
 using namespace std;
 Bitmap::Bitmap(int n_blocks)
     : num_blocks_(n_blocks),
-    just_sent_(),
+    just_sent_(-1),
     bitmap_()
 { }
 

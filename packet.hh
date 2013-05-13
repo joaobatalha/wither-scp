@@ -9,7 +9,7 @@
 #define HEADER_SIZE (sizeof( Integer64 ) * 7)
 #define DATA_PACKET_SIZE 1472
 //#define PAYLOAD_SIZE ((DATA_PACKET_SIZE) - (HEADER_SIZE))
-#define PAYLOAD_SIZE 10
+#define PAYLOAD_SIZE 1400
 
 #define PAYLOAD_MESSAGE 0
 #define IP_MESSAGE 1

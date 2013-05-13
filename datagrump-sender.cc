@@ -73,6 +73,7 @@ int main( int argc, char *argv[] )
           sock.send( x );
         } else {
           if ( file.is_open() ) {
+            printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
             file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
             printf("pointer is at %d\n", file.tellg());
             file.read ( file_payload, PAYLOAD_SIZE);
@@ -80,15 +81,14 @@ int main( int argc, char *argv[] )
           } else {
             throw string("unable to open file");
           }
-          Packet x( destination, sequence_number++, block_num, file_payload);
+          Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
           printf("sending block %d\n",  block_num);
           sock.send( x );
         }
       }
 
       if ( !sentSize) {
-        file_payload = (char *) to_string(size).c_str();
-        Packet x( destination, 0, 0, file_payload);
+        Packet x( destination, 0, 0, to_string((long long)size));
         sock.send( x );
       }
 
@@ -107,8 +107,7 @@ int main( int argc, char *argv[] )
         int block_num = bitmap.next_block();
 
         if ( !sentSize) {
-          file_payload = (char *) to_string(size).c_str();
-          Packet x( destination, 0, 0, file_payload);
+          Packet x( destination, 0, 0, to_string((long long) size));
           sock.send( x );
         } else {
           if ( block_num == -1 ) { //transfer is complete
@@ -116,14 +115,15 @@ int main( int argc, char *argv[] )
             sock.send( x );
           } else {
             if ( file.is_open() ) {
+              printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
               file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
-              printf("pointer is at %d", file.tellg());
+              printf("pointer is at %d\n", file.tellg());
               file.read ( file_payload, PAYLOAD_SIZE);
               file.clear();
             } else {
               throw string("unable to open file");
             }
-            Packet x( destination, sequence_number++, block_num, file_payload);
+            Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
             printf("sending block %d\n",  block_num);
             sock.send( x );
           }
@@ -148,6 +148,7 @@ int main( int argc, char *argv[] )
           ack.recv_timestamp() );
 
         if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
+          free(file_payload);
           break;
         }
 

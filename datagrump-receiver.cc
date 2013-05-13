@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <poll.h>
 #include <fstream>
+#include <iostream>
 
 #include "socket.hh"
 
@@ -65,7 +66,7 @@ int main( int argc, char *argv[] )
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
-          fprintf( stderr, "%s", received_packet.payload().c_str() );
+          cout << "payload received: " + received_packet.payload();
           if (received_packet.message_type() == COMPLETE_MESSAGE){
             Packet ack( received_packet.addr(), 1, received_packet, COMPLETE_MESSAGE );
             sock.send( ack );
