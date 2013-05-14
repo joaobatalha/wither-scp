@@ -6,6 +6,9 @@
 #include <bitset>
 #include <math.h>
 #include <iostream>
+#include <time.h>
+#include <sys/time.h>
+#include <stdlib.h>
 
 #include "socket.hh"
 #include "controller.hh"
@@ -59,6 +62,15 @@ int main( int argc, char *argv[] )
     /* Initialize flow controller */
     Controller controller( debug );
 
+    timeval t1;
+    timeval t2;
+    timeval t3;
+    timeval t4;
+    float time_io;
+    float total;
+    gettimeofday(&t1, NULL);
+
+
     /* Loop */
     while ( 1 ) {
       /* Ask controller: what is the window size? */
@@ -73,14 +85,17 @@ int main( int argc, char *argv[] )
           sock.send( x );
         } else {
           if ( file.is_open() ) {
+	    gettimeofday(&t2,NULL);
             //printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
             file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
             //printf("pointer is at %d\n", file.tellg());
             file.read ( file_payload, PAYLOAD_SIZE);
             file.clear();
+	      gettimeofday(&t3,NULL);
           } else {
             throw string("unable to open file");
           }
+	  time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
           Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
           printf("sending block %d\n",  block_num);
           sock.send( x );
@@ -115,14 +130,17 @@ int main( int argc, char *argv[] )
             sock.send( x );
           } else {
             if ( file.is_open() ) {
+		gettimeofday(&t2,NULL);
               //printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
               file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
               //printf("pointer is at %d\n", file.tellg());
               file.read ( file_payload, PAYLOAD_SIZE);
               file.clear();
+		gettimeofday(&t3,NULL);
             } else {
               throw string("unable to open file");
             }
+	  time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
             Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
             //printf("sending block %d\n",  block_num);
             sock.send( x );
@@ -148,6 +166,11 @@ int main( int argc, char *argv[] )
           ack.recv_timestamp() );
 
         if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
+	    gettimeofday(&t4,NULL);
+
+	  total += (t4.tv_sec - t1.tv_sec)*1000 + (t4.tv_usec - t1.tv_usec)/float(1000);
+	  fprintf(stderr, "\n Time to transfer file: %.3f\n", total);
+	  fprintf(stderr, "\n Time in IO file: %.3f\n", time_io);
           free(file_payload);
           break;
         }

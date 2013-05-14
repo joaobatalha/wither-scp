@@ -54,7 +54,7 @@ void Socket::send( Packet & packet ) const
 {
   packet.set_send_timestamp();
   string payload( packet.str() );
-  printf(" send seq num %d type %d", packet.sequence_number(), packet.message_type());
+  //printf(" send seq num %d type %d", packet.sequence_number(), packet.message_type());
   //std::cout << " payload " + packet.payload() + ".\n";
 
   ssize_t bytes_sent = sendto( sock_, payload.data(),
