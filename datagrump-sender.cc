@@ -73,16 +73,16 @@ int main( int argc, char *argv[] )
           sock.send( x );
         } else {
           if ( file.is_open() ) {
-            printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
+//            printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
             file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
-            printf("pointer is at %d\n", file.tellg());
+//            printf("pointer is at %d\n", file.tellg());
             file.read ( file_payload, PAYLOAD_SIZE);
             file.clear();
           } else {
             throw string("unable to open file");
           }
           Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
-          printf("sending block %d\n",  block_num);
+//          printf("sending block %d\n",  block_num);
           sock.send( x );
         }
       }
@@ -115,16 +115,16 @@ int main( int argc, char *argv[] )
             sock.send( x );
           } else {
             if ( file.is_open() ) {
-              printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
+//              printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
               file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
-              printf("pointer is at %d\n", file.tellg());
+//              printf("pointer is at %d\n", file.tellg());
               file.read ( file_payload, PAYLOAD_SIZE);
               file.clear();
             } else {
               throw string("unable to open file");
             }
             Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
-            printf("sending block %d\n",  block_num);
+//            printf("sending block %d\n",  block_num);
             sock.send( x );
           }
         } 
@@ -132,28 +132,28 @@ int main( int argc, char *argv[] )
       } else {
         /* we got an acknowledgment */
         Packet ack = sock.recv();
-        if (ack.sequence_number() == 1) {
-          sentSize = true;
-        } else {
-          bitmap.set_bit(ack.block_number());
-          /* update our counter */
-        }
-        next_ack_expected = max( next_ack_expected,
-          ack.ack_sequence_number() + 1 );
-
-        /* tell the controller */
-        controller.ack_received( ack.ack_sequence_number(),
-          ack.ack_send_timestamp(),
-          ack.ack_recv_timestamp(),
-          ack.recv_timestamp() );
-
-        if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
-          free(file_payload);
-          break;
-        }
-
         if ( ack.message_type() == IP_MESSAGE) { /* Update destination IP */
           destination = ack.addr();
+        } else {
+          if (ack.sequence_number() == 1) {
+            sentSize = true;
+          } else {
+            bitmap.set_bit(ack.block_number());
+            /* update our counter */
+          }
+          next_ack_expected = max( next_ack_expected,
+            ack.ack_sequence_number() + 1 );
+
+          /* tell the controller */
+          controller.ack_received( ack.ack_sequence_number(),
+            ack.ack_send_timestamp(),
+            ack.ack_recv_timestamp(),
+            ack.recv_timestamp() );
+
+          if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
+            free(file_payload);
+            break;
+          }
         }
       }
     }
