@@ -5,7 +5,7 @@
 
 #include "socket.hh"
 
-#define TIMEOUT 100
+#define TIMEOUT 2000
 
 using namespace Network;
 using namespace std;
@@ -35,6 +35,8 @@ int main( int argc, char *argv[] )
     string filename = string("output.txt");
     ofstream file;
     file.open(filename, ios::out | ios::binary | ios::trunc);
+
+    Address destination("18.0.0.1", argv[1]); //initialize destination with dumb ip 
     
     while ( 1 ) {
 
@@ -49,8 +51,8 @@ int main( int argc, char *argv[] )
 
       } else if ( packet_received == 0 ) { /* timeout */
         /* send a IP_MESSAGE*/
-//        Packet ack(received_packet.addr(), 1, received_packet, IP_MESSAGE);
-//        sock.send( ack );
+        Packet ip(destination, 1, 0, "", IP_MESSAGE);
+        sock.send( ip );
 
       } else {
 
@@ -63,10 +65,14 @@ int main( int argc, char *argv[] )
           file.seekp(filesize-1); 
           file.write("\0", 1);
 
+          destination = received_packet.addr(); //update destination
+
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
-          //cout << "payload received: " + received_packet.payload();
+#ifdef DEBUG
+          cout << "payload received: " + received_packet.payload();
+#endif
           if (received_packet.message_type() == COMPLETE_MESSAGE){
             Packet ack( received_packet.addr(), 1, received_packet, COMPLETE_MESSAGE );
             sock.send( ack );
@@ -79,6 +85,8 @@ int main( int argc, char *argv[] )
           }
           file.seekp(received_packet.block_number() * PAYLOAD_SIZE, ios::beg); 
           file.write(received_packet.payload().c_str(), received_packet.payload().size());
+
+          destination = received_packet.addr(); //update destination
 
           /* Send back acknowledgment */
           Packet ack( received_packet.addr(), sequence_number++, received_packet );

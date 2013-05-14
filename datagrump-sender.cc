@@ -85,19 +85,19 @@ int main( int argc, char *argv[] )
           sock.send( x );
         } else {
           if ( file.is_open() ) {
-	    gettimeofday(&t2,NULL);
+            gettimeofday(&t2,NULL);
             //printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
             file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
             //printf("pointer is at %d\n", file.tellg());
             file.read ( file_payload, PAYLOAD_SIZE);
             file.clear();
-	      gettimeofday(&t3,NULL);
+            gettimeofday(&t3,NULL);
           } else {
             throw string("unable to open file");
           }
-	  time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
+          time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
+          fprintf(stderr, "sending percent %f\n",  1.0*block_num/bitmap.num_blocks());
           Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
-          printf("sending block %d\n",  block_num);
           sock.send( x );
         }
       }
@@ -130,19 +130,20 @@ int main( int argc, char *argv[] )
             sock.send( x );
           } else {
             if ( file.is_open() ) {
-		gettimeofday(&t2,NULL);
+              gettimeofday(&t2,NULL);
               //printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
               file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
               //printf("pointer is at %d\n", file.tellg());
               file.read ( file_payload, PAYLOAD_SIZE);
               file.clear();
-		gettimeofday(&t3,NULL);
+              gettimeofday(&t3,NULL);
             } else {
               throw string("unable to open file");
             }
-	  time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
+            time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
+            fprintf(stderr, "sending percent %f\n",  1.0*block_num/bitmap.num_blocks());
             Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
-            //printf("sending block %d\n",  block_num);
+//            printf("sending block %d\n",  block_num);
             sock.send( x );
           }
         } 
@@ -150,33 +151,33 @@ int main( int argc, char *argv[] )
       } else {
         /* we got an acknowledgment */
         Packet ack = sock.recv();
-        if (ack.sequence_number() == 1) {
-          sentSize = true;
-        } else {
-          bitmap.set_bit(ack.block_number());
-          /* update our counter */
-        }
-        next_ack_expected = max( next_ack_expected,
-          ack.ack_sequence_number() + 1 );
-
-        /* tell the controller */
-        controller.ack_received( ack.ack_sequence_number(),
-          ack.ack_send_timestamp(),
-          ack.ack_recv_timestamp(),
-          ack.recv_timestamp() );
-
-        if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
-	    gettimeofday(&t4,NULL);
-
-	  total += (t4.tv_sec - t1.tv_sec)*1000 + (t4.tv_usec - t1.tv_usec)/float(1000);
-	  fprintf(stderr, "\n Time to transfer file: %.3f\n", total);
-	  fprintf(stderr, "\n Time in IO file: %.3f\n", time_io);
-          free(file_payload);
-          break;
-        }
-
         if ( ack.message_type() == IP_MESSAGE) { /* Update destination IP */
           destination = ack.addr();
+        } else {
+          if (ack.sequence_number() == 1) {
+            sentSize = true;
+          } else {
+            bitmap.set_bit(ack.block_number());
+            /* update our counter */
+          }
+          next_ack_expected = max( next_ack_expected,
+            ack.ack_sequence_number() + 1 );
+
+          /* tell the controller */
+          controller.ack_received( ack.ack_sequence_number(),
+            ack.ack_send_timestamp(),
+            ack.ack_recv_timestamp(),
+            ack.recv_timestamp() );
+
+          if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
+            gettimeofday(&t4,NULL);
+
+            total += (t4.tv_sec - t1.tv_sec)*1000 + (t4.tv_usec - t1.tv_usec)/float(1000);
+            fprintf(stderr, "\n Time to transfer file: %.3f\n", total);
+            fprintf(stderr, "\n Time in IO file: %.3f\n", time_io);
+            free(file_payload);
+            break;
+          }
         }
       }
     }

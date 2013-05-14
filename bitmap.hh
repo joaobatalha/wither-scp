@@ -5,7 +5,7 @@ class Bitmap {
     private:
         int num_blocks_; 
         int just_sent_; 
-        char bitmap_[300000];
+        char bitmap_[30000];
 
         bool is_set( int block_number );
     public:
@@ -16,5 +16,7 @@ class Bitmap {
         void set_bit( int block_number );
 
         int next_block( void );
+
+        int num_blocks( void ) {return num_blocks_; }
 };
 #endif
