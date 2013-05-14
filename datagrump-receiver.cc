@@ -66,7 +66,7 @@ int main( int argc, char *argv[] )
           Packet ack( received_packet.addr(), 1, received_packet );
           sock.send( ack );
         } else {
-          cout << "payload received: " + received_packet.payload();
+          //cout << "payload received: " + received_packet.payload();
           if (received_packet.message_type() == COMPLETE_MESSAGE){
             Packet ack( received_packet.addr(), 1, received_packet, COMPLETE_MESSAGE );
             sock.send( ack );
