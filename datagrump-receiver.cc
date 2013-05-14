@@ -59,7 +59,7 @@ int main( int argc, char *argv[] )
         if (received_packet.sequence_number() == 0) {
           //payload is filesize
           int filesize = atoi(received_packet.payload().c_str());
-          printf("filesize %d\n", filesize);
+          //printf("filesize %d\n", filesize);
           file.seekp(filesize-1); 
           file.write("\0", 1);
 

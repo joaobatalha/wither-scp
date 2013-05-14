@@ -73,9 +73,9 @@ int main( int argc, char *argv[] )
           sock.send( x );
         } else {
           if ( file.is_open() ) {
-            printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
+            //printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
             file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
-            printf("pointer is at %d\n", file.tellg());
+            //printf("pointer is at %d\n", file.tellg());
             file.read ( file_payload, PAYLOAD_SIZE);
             file.clear();
           } else {
@@ -115,16 +115,16 @@ int main( int argc, char *argv[] )
             sock.send( x );
           } else {
             if ( file.is_open() ) {
-              printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
+              //printf("pointer expected at %d\n", block_num*PAYLOAD_SIZE);
               file.seekg ( block_num*PAYLOAD_SIZE, ios::beg);
-              printf("pointer is at %d\n", file.tellg());
+              //printf("pointer is at %d\n", file.tellg());
               file.read ( file_payload, PAYLOAD_SIZE);
               file.clear();
             } else {
               throw string("unable to open file");
             }
             Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
-            printf("sending block %d\n",  block_num);
+            //printf("sending block %d\n",  block_num);
             sock.send( x );
           }
         } 
