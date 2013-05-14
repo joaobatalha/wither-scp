@@ -81,8 +81,8 @@ int main( int argc, char *argv[] )
           } else {
             throw string("unable to open file");
           }
+          fprintf(stderr, "sending percent %f\n",  1.0*block_num/bitmap.num_blocks());
           Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
-          printf("sending percent %d\n",  block_num/bitmap.num_blocks());
           sock.send( x );
         }
       }
@@ -123,6 +123,7 @@ int main( int argc, char *argv[] )
             } else {
               throw string("unable to open file");
             }
+            fprintf(stderr, "sending percent %f\n",  1.0*block_num/bitmap.num_blocks());
             Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
 //            printf("sending block %d\n",  block_num);
             sock.send( x );
