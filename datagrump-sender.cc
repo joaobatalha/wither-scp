@@ -82,7 +82,7 @@ int main( int argc, char *argv[] )
             throw string("unable to open file");
           }
           Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
-//          printf("sending block %d\n",  block_num);
+          printf("sending percent %d\n",  block_num/bitmap.num_blocks());
           sock.send( x );
         }
       }

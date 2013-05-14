@@ -16,5 +16,7 @@ class Bitmap {
         void set_bit( int block_number );
 
         int next_block( void );
+
+        int num_blocks( void ) {return num_blocks_; }
 };
 #endif
