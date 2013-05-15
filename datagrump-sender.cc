@@ -97,7 +97,7 @@ int main( int argc, char *argv[] )
             throw string("unable to open file");
           }
           time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
-          fprintf(stderr, "sending percent %f\n",  1.0*block_num/bitmap.num_blocks());
+          fprintf(stderr, "%f%%\n",  100.0*bitmap.bits_set()/bitmap.num_blocks());
           Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
           sock.send( x );
         }
@@ -142,7 +142,7 @@ int main( int argc, char *argv[] )
               throw string("unable to open file");
             }
             time_io += (t3.tv_sec - t2.tv_sec)*1000 + (t3.tv_usec - t2.tv_usec)/float(1000);
-            fprintf(stderr, "sending percent %f\n",  1.0*block_num/bitmap.num_blocks());
+            fprintf(stderr, "%f%%\n",  100.0*bitmap.bits_set()/bitmap.num_blocks());
             Packet x( destination, sequence_number++, block_num, string(file_payload, file.gcount()));
 //            printf("sending block %d\n",  block_num);
             sock.send( x );

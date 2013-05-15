@@ -9,7 +9,7 @@ using namespace Network;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug ), the_estimated_rtt(40), the_throughput(.10), update_time(0),
+  : debug_( debug ), the_estimated_rtt(60), the_throughput(.10), update_time(0),
     update_interval(20), last_seq_num(0)
 {
 }
@@ -41,11 +41,11 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
   uint64_t timediff = timestamp_ack_received - update_time;
 
   if(timediff >= update_interval){
-      fprintf(stderr, "Throughput estimate is %f\n", the_throughput);
+      //fprintf(stderr, "Throughput estimate is %f\n", the_throughput);
       int numpkts = sequence_number_acked - last_seq_num;
 
       the_throughput = std::max(1.0/rtt, 
-              .70 * the_throughput + .35 * numpkts/timediff);
+              .79 * the_throughput + .35 * numpkts/timediff);
  
       update_time = timestamp_ack_received;
       last_seq_num = sequence_number_acked;
