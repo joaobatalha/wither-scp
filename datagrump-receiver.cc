@@ -51,6 +51,8 @@ int main( int argc, char *argv[] )
 
       } else if ( packet_received == 0 ) { /* timeout */
         /* send a IP_MESSAGE*/
+        fprintf(stderr, "sending updated ip address");
+
         Packet ip(destination, 1, 0, "", IP_MESSAGE);
         sock.send( ip );
 

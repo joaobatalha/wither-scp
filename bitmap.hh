@@ -5,6 +5,7 @@ class Bitmap {
     private:
         int num_blocks_; 
         int just_sent_; 
+        int bits_set_; 
         char bitmap_[30000];
 
     public:
@@ -19,5 +20,7 @@ class Bitmap {
         int next_block( void );
 
         int num_blocks( void ) {return num_blocks_; }
+        
+        int bits_set( void ) {return bits_set_; }
 };
 #endif

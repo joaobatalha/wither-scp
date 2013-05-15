@@ -9,7 +9,7 @@ using namespace Network;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug ), the_estimated_rtt(70), the_throughput(.10), update_time(0),
+  : debug_( debug ), the_estimated_rtt(40), the_throughput(.10), update_time(0),
     update_interval(20), last_seq_num(0)
 {
 }
