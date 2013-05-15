@@ -72,7 +72,7 @@ void Socket::send( Packet & packet ) const
 /* Receive a packet and associated timestamp */
 Packet Socket::recv( void ) const
 {
-  static const int RECEIVE_MTU = 2048;
+  static const int RECEIVE_MTU = 16240;
 
   /* receive source address, timestamp, and payload in msghdr structure */
   struct sockaddr_in packet_remote_addr;

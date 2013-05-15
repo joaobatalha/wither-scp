@@ -9,7 +9,7 @@ using namespace Network;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug ), the_estimated_rtt(60), the_throughput(0.0), update_time(0),
+  : debug_( debug ), the_estimated_rtt(70), the_throughput(0.0), update_time(0),
     update_interval(20), last_seq_num(0)
 {
 }
@@ -49,6 +49,8 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
       update_time = timestamp_ack_received;
       last_seq_num = sequence_number_acked;
 
+      fprintf(stderr, "Throughput estimate is %f\n", the_throughput);
+
   } 
 
   /* Default: take no action */
@@ -67,5 +69,5 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 /* How long to wait if there are no acks before sending one more packet */
 unsigned int Controller::timeout_ms( void )
 {
-  return 10000; /* timeout of one second */
+  return 500; /* timeout of one second */
 }
