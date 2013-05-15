@@ -75,6 +75,7 @@ int main( int argc, char *argv[] )
     while ( 1 ) {
       /* Ask controller: what is the window size? */
       unsigned int window_size = controller.window_size();
+      fprintf(stderr, "window size is %u\n", window_size);
 
       /* fill up window */
       while (sentSize && sequence_number - next_ack_expected < window_size ) {
@@ -164,10 +165,12 @@ int main( int argc, char *argv[] )
             ack.ack_sequence_number() + 1 );
 
           /* tell the controller */
-          controller.ack_received( ack.ack_sequence_number(),
-            ack.ack_send_timestamp(),
-            ack.ack_recv_timestamp(),
-            ack.recv_timestamp() );
+          if(!bitmap.is_set(ack.block_number())) {
+            controller.ack_received( ack.ack_sequence_number(),
+              ack.ack_send_timestamp(),
+              ack.ack_recv_timestamp(),
+              ack.recv_timestamp() );
+          }
 
           if ( ack.message_type() == COMPLETE_MESSAGE) { /* Finished sending */
             gettimeofday(&t4,NULL);

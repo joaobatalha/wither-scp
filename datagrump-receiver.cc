@@ -83,6 +83,7 @@ int main( int argc, char *argv[] )
           if(!file.is_open()){
             printf("not open file");
           }
+
           file.seekp(received_packet.block_number() * PAYLOAD_SIZE, ios::beg); 
           file.write(received_packet.payload().c_str(), received_packet.payload().size());
 

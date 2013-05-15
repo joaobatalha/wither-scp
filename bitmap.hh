@@ -7,9 +7,10 @@ class Bitmap {
         int just_sent_; 
         char bitmap_[30000];
 
-        bool is_set( int block_number );
     public:
         Bitmap(int n_blocks);
+
+        bool is_set( int block_number );
 
         bool is_full( void );
 

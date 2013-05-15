@@ -7,7 +7,7 @@
 #include "int64.hh"
 
 #define HEADER_SIZE (sizeof( Integer64 ) * 7)
-#define DATA_PACKET_SIZE 10000
+#define DATA_PACKET_SIZE 1500
 #define PAYLOAD_SIZE ((DATA_PACKET_SIZE) - (HEADER_SIZE))
 //#define PAYLOAD_SIZE 500
 
