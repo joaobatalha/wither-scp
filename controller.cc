@@ -9,7 +9,7 @@ using namespace Network;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug ), the_estimated_rtt(80), the_throughput(.10), update_time(0),
+  : debug_( debug ), the_estimated_rtt(70), the_throughput(.10), update_time(0),
     update_interval(20), last_seq_num(0)
 {
 }
@@ -37,7 +37,7 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                    /* when the ack was received (by sender) */
 {
-  uint64_t rtt = recv_timestamp_acked - send_timestamp_acked;
+  uint64_t rtt = (timestamp_ack_received - send_timestamp_acked)/2;
   uint64_t timediff = timestamp_ack_received - update_time;
 
   if(timediff >= update_interval){
